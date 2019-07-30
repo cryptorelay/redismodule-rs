@@ -1,6 +1,7 @@
 use std::os::raw::c_void;
 use std::ptr;
 use std::string;
+use std::mem;
 
 use libc::size_t;
 
@@ -181,7 +182,7 @@ impl RedisKeyWritable {
         Ok(Some(value))
     }
 
-    pub fn set_value<T>(&self, redis_type: &RedisType, value: T) -> Result<(), RedisError> {
+    pub fn set_value<T>(&self, redis_type: &RedisType, value: T) -> Result<&mut T, RedisError> {
         verify_type(self.key_inner, redis_type)?;
         let value = Box::into_raw(Box::new(value)) as *mut c_void;
         let status: raw::Status = unsafe {
@@ -193,15 +194,9 @@ impl RedisKeyWritable {
         }
         .into();
 
-        status.into()
-    }
-}
-
-impl From<raw::Status> for Result<(), RedisError> {
-    fn from(s: raw::Status) -> Self {
-        match s {
-            raw::Status::Ok => Ok(()),
-            raw::Status::Err => Err(RedisError::String("Generic error".to_string())),
+        match status {
+            raw::Status::Ok => Ok(unsafe{mem::transmute(value)}),
+            raw::Status::Err => Err(RedisError::Str("Generic error")),
         }
     }
 }

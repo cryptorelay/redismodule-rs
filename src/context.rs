@@ -125,10 +125,12 @@ impl Context {
         raw::replicate_verbatim(self.ctx);
     }
 
-    pub fn create_timer<F>(&self, period: u64, mut callback: F) -> u64
-        where F: FnMut(Context) -> (),
-              F: 'static
+    pub fn create_timer(
+        &self, period: u64,
+        callback: extern "C" fn(*mut raw::RedisModuleCtx, *mut libc::c_void) -> (),
+        arg: *mut libc::c_void
+        ) -> u64
     {
-        raw::create_timer(self.ctx, period, move |ctx| callback(Context::new(ctx)))
+        raw::create_timer(self.ctx, period, callback, arg)
     }
 }

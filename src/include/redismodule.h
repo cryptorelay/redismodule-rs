@@ -6,6 +6,7 @@
 #include <stdio.h>
 
 /* ---------------- Defines common between core and modules --------------- */
+#define REDISMODULE_EXPERIMENTAL_API 1
 
 /* Error status return values. */
 #define REDISMODULE_OK 0
@@ -323,9 +324,9 @@ int REDISMODULE_API_FUNC(RedisModule_SendClusterMessage)(RedisModuleCtx *ctx, ch
 int REDISMODULE_API_FUNC(RedisModule_GetClusterNodeInfo)(RedisModuleCtx *ctx, const char *id, char *ip, char *master_id, int *port, int *flags);
 char **REDISMODULE_API_FUNC(RedisModule_GetClusterNodesList)(RedisModuleCtx *ctx, size_t *numnodes);
 void REDISMODULE_API_FUNC(RedisModule_FreeClusterNodesList)(char **ids);
-RedisModuleTimerID REDISMODULE_API_FUNC(RedisModule_CreateTimer)(RedisModuleCtx *ctx, mstime_t period, RedisModuleTimerProc callback, void *data);
-int REDISMODULE_API_FUNC(RedisModule_StopTimer)(RedisModuleCtx *ctx, RedisModuleTimerID id, void **data);
-int REDISMODULE_API_FUNC(RedisModule_GetTimerInfo)(RedisModuleCtx *ctx, RedisModuleTimerID id, uint64_t *remaining, void **data);
+uint64_t REDISMODULE_API_FUNC(RedisModule_CreateTimer)(RedisModuleCtx *ctx, mstime_t period, RedisModuleTimerProc callback, void *data);
+int REDISMODULE_API_FUNC(RedisModule_StopTimer)(RedisModuleCtx *ctx, uint64_t id, void **data);
+int REDISMODULE_API_FUNC(RedisModule_GetTimerInfo)(RedisModuleCtx *ctx, uint64_t id, uint64_t *remaining, void **data);
 const char *REDISMODULE_API_FUNC(RedisModule_GetMyClusterID)(void);
 size_t REDISMODULE_API_FUNC(RedisModule_GetClusterSize)(void);
 void REDISMODULE_API_FUNC(RedisModule_GetRandomBytes)(unsigned char *dst, size_t len);

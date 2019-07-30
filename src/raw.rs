@@ -10,6 +10,8 @@ extern crate num_traits;
 
 use num_traits::FromPrimitive;
 use libc::size_t;
+use std::mem;
+use std::boxed::Box;
 
 pub use crate::redisraw::bindings::*;
 use crate::RedisString;
@@ -226,4 +228,17 @@ pub fn load_string(rdb: *mut RedisModuleIO) -> String {
 
 pub fn save_string(rdb: *mut RedisModuleIO, buf: &String) {
     unsafe { RedisModule_SaveStringBuffer.unwrap()(rdb, buf.as_ptr() as *mut i8, buf.len()) };
+}
+
+extern "C" fn timer_callback(ctx: *mut RedisModuleCtx, arg: *mut libc::c_void) -> () {
+    let closure: &mut Box<FnMut(*mut RedisModuleCtx) -> ()> = unsafe { mem::transmute(arg) };
+    closure(ctx)
+}
+
+pub fn create_timer<F>(ctx: *mut RedisModuleCtx, period: u64, callback: F) -> u64
+    where F: FnMut(*mut RedisModuleCtx) -> (),
+          F: 'static
+{
+    let cb: Box<Box<FnMut(*mut RedisModuleCtx) -> ()>> = Box::new(Box::new(callback));
+    unsafe { RedisModule_CreateTimer.unwrap()(ctx, period as i64, Some(timer_callback), Box::into_raw(cb) as *mut _) }
 }

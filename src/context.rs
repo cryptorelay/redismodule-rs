@@ -124,4 +124,11 @@ impl Context {
     pub fn replicate_verbatim(&self) {
         raw::replicate_verbatim(self.ctx);
     }
+
+    pub fn create_timer<F>(&self, period: u64, mut callback: F) -> u64
+        where F: FnMut(Context) -> (),
+              F: 'static
+    {
+        raw::create_timer(self.ctx, period, move |ctx| callback(Context::new(ctx)))
+    }
 }

@@ -93,7 +93,7 @@ macro_rules! redis_module {
             // Using another block to make sure all memory allocated before we
             // switch to Redis allocator will be out of scope
             unsafe {
-                if true {
+                if false {
                     redismodule::alloc::use_redis_alloc();
                 } else {
                     eprintln!("*** NOT USING Redis allocator ***");
